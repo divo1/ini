@@ -1,14 +1,28 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cstring>
+#include <string>
 #include <vector>
 #include <map>
 #include <cstdlib>
+#include <algorithm>
 
 #include "CIniException.hpp"
 
 using namespace std;
+class iniNode;
+
+class CIni {
+	private:
+		fstream file;
+		map<string, iniNode*> nodes;
+		map<string, int> sekcja_nr;
+		string parent;
+	public:
+		CIni(string);
+		iniNode operator [] (string);
+		operator string();
+};
 
 class iniNode {
 	private:
@@ -21,10 +35,14 @@ class iniNode {
 		iniNode();
 		iniNode(string&);
 		iniNode(string, bool);
-		iniNode(const iniNode&);
 		iniNode(string, string&);
+		iniNode(string, string, bool);
+
 		void add(string);
 		void add(string, string);
+		
+		void copy(iniNode*);
+
 		string getName();
 		iniNode operator [] (string);
 		bool empty();
@@ -47,16 +65,4 @@ class iniNode {
 
 		double getD() throw(CIniException);
 		double getD(double);
-};
-
-class CIni {
-	private:
-		fstream file;
-		map<string, iniNode*> nodes;
-		map<string, int> sekcja_nr;
-		string parent;
-	public:
-		CIni(string);
-		iniNode operator [] (string);
-		operator string();
 };

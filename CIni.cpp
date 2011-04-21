@@ -18,9 +18,11 @@ CIni::CIni(string filepath) {
 				
 				if(flag) {
 					name = temp.substr(1, flag - 1);
-					this->parent = temp.substr(flag + 1, temp.length() - flag - 2);/*
+					this->parent = temp.substr(flag + 1, temp.length() - flag - 2);
 					if(this->nodes.find(name) == this->nodes.end() && this->nodes.find(this->parent) != this->nodes.end()) {
-						this->nodes.insert(pair<string,iniNode*>(name, new iniNode(*this->nodes[this->parent])));
+						iniNode *temp = new iniNode(name, this->nodes[this->parent]->get(""), true);
+						temp->copy(this->nodes[this->parent]);
+						this->nodes.insert(pair<string,iniNode*>(name, temp));
 					} /*else if(this->nodes.find(this->parent) == this->nodes.end()) {
 						throw new CIniException("Brak parenta");
 					}*/
@@ -72,15 +74,6 @@ iniNode::iniNode(string name, bool flaga) {
 	this->value = "[empty]";
 	this->exist = false;
 }
-iniNode::iniNode(const iniNode & n) {/*
-	map<string, iniNode*>::iterator it;
-	for(it = n.child.begin(); it != n.child.end(); it++) {
-		if((*it).second->child.size() > 0) {
-			iniNode* temp = new iniNode(*(*it).second);
-			this->child.insert(pair<string,iniNode*>((*it).first, temp));
-		}
-	}*/
-}
 iniNode::iniNode(string &s) {
 	this->name = "";
 	this->value = "";
@@ -112,18 +105,10 @@ iniNode::iniNode(string &s) {
 	}
 	
 	if(flaga) {
-		for(int i = 0; i < s.length(); i++) {
-			if(s[i] == '.') {
-				s[i] = ',';
-			}
-		}
+		replace(s.begin(), s.end(), '.', ',');
 	}
 	this->add(this->value, s);
-	for(int i = 0; i < this->value.length(); i++) {
-		if(this->value[i] == ',') {
-			this->value[i] = '.';
-		}
-	}
+	replace(this->value.begin(), this->value.end(), ',', '.');
 }
 iniNode::iniNode(string name, string &s) {
 	this->name = this->trim(name);
@@ -146,19 +131,17 @@ iniNode::iniNode(string name, string &s) {
 	}
 	
 	if(flaga) {
-		for(int i = 0; i < s.length(); i++) {
-			if(s[i] == '.') {
-				s[i] = ',';
-			}
-		}
+		replace(s.begin(), s.end(), '.', ',');
 	}
 	this->add(this->value, s);
-	for(int i = 0; i < this->value.length(); i++) {
-		if(this->value[i] == ',') {
-			this->value[i] = '.';
-		}
-	}
+	replace(this->value.begin(), this->value.end(), ',', '.');
 }
+iniNode::iniNode(string name, string s, bool flag) {
+	this->name = this->trim(name);
+	this->value = s;
+	this->exist = flag;
+}
+
 void iniNode::add(string s) {
 	if(!s.empty()) {
 		int i = 0;
@@ -196,17 +179,32 @@ void iniNode::add(string name, string s) {
 		}
 	}
 }
+
+void iniNode::copy(iniNode *n) {
+	map<string, iniNode*>::iterator it;
+	for(it = n->child.begin(); it != n->child.end(); it++) {
+		this->child.insert(pair<string,iniNode*>((*it).first, new iniNode((*it).first, (*it).second->value, true)));
+		this->child[(*it).first]->copy((*it).second);
+	}
+}
+
 iniNode iniNode::operator [](string s) {
 	if(this->child.find(s) == this->child.end()) {
 		this->child.insert(pair<string,iniNode*>(s, new iniNode(s, true)));
 	}
-	return *this->child[s];
+	//cout << this->child[s]->empty();
+	return (*this->child[s]);
 }
 string iniNode::getName() {
 	return this->name;
 }
 iniNode::operator string() {
-	return this->value;
+	string temp;
+	map<string, iniNode*>::iterator it;
+	for(it = this->child.begin(); it != this->child.end(); it++) {
+		temp += (*it).first + " : " + ((*it).second->value) + '\n' + (string)(*(*it).second);
+	}
+	return temp;
 }
 string iniNode::trim(string &s) {
 	int k = 0, l = 1;
@@ -233,7 +231,7 @@ string iniNode::trim(string &s) {
 	return s;
 }
 bool iniNode::empty() {
-	return this->exist;
+	return !this->exist;
 }
 
 // gettery
