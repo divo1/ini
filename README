@@ -1,10 +1,10 @@
-Naraziepodstawoweprzegladanieinidziała.Całyplikjestwczytywanydopamięciidostępdoniegojestprzezodpowiedniąklasę.
+Na razie podstawowe przegladanie ini działa.Cały plik jes twczytywany do pamięci i dostęp d oniego jes tprzez odpowiednią klasę.
 
 TODO:
--dodanieparsowaniatablic
--jeżeliniemawartosc=cos,ajestwartosc.wartosc1=cos,towartoscmazwrocicarray
+-dodanie parsowania tablic
+-jeżeli nie ma wartosc=cos, a jest wartosc.wartosc1=cos, to wartosc ma zwrocic array
 -count
--dodacnadpisywaniewartosciprzezkolejneelementy
+-dodac nadpisywanie wartosci przez kolejne elementy
 
 DONE:
--dziedziczeniesekcji-21.04.2011
+-dziedziczenie sekcji - 21.04.2011
