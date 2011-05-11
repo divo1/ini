@@ -1,4 +1,5 @@
-Na razie podstawowe przegladanie ini działa.Cały plik jes twczytywany do pamięci i dostęp d oniego jes tprzez odpowiednią klasę.
+Na razie podstawowe przegladanie ini działa.
+Cały plik jest wczytywany do pamięci i dostęp do niego jest przez odpowiednią klasę.
 
 TODO:
 -dodanie parsowania tablic
