@@ -37,7 +37,7 @@ class iniNode {
 		iniNode(string, string&);
 		iniNode(string, string, bool);
 
-		void add(string);
+		void add(string); // metoda do dodawania stringa do configa
 		void add(string, string);
 		
 		void copy(iniNode*);
@@ -46,6 +46,7 @@ class iniNode {
 		iniNode operator [] (string);
 		bool empty();
 		operator string();
+		string toString(int i);
 
 		string get() throw(CIniException);
 		string get(string);

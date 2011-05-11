@@ -4,12 +4,12 @@
 /**
  * TODO:
  * - dodanie parsowania tablic
- * - jeżeli nie ma wartosc = cos, a jest wartosc.wartosc1 = cos, to wartosc ma zwrocic array
  * - count
  * - dodac nadpisywanie wartosci przez kolejne elementy
  *
  * DONE:
  * - dziedziczenie sekcji - 21.04.2011
+ * - jeżeli nie ma wartosc = cos, a jest wartosc.wartosc1 = cos, to wartosc ma zwrocic array - 21.04.2011
  */
 
 int main() {
