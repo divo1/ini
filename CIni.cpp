@@ -94,9 +94,6 @@ iniNode::iniNode(string &s) {
 		temp = this->prepareString(s);
 	}
 	
-	if(flaga) {
-		replace(s.begin(), s.end(), '.', ',');
-	}
 	this->value = temp;
 	this->add(this->value, s);
 
@@ -111,12 +108,8 @@ iniNode::iniNode(string name, string &s) {
 	this->value = "[Array]";
 	this->exist = true;
 	this->arrayLength = 0;
-	bool flaga = false;
 	string temp = this->prepareString(s);;
 	
-	if(flaga) {
-		replace(s.begin(), s.end(), '.', ',');
-	}
 	this->value = temp;
 	this->add(temp, s);
 	replace(this->value.begin(), this->value.end(), ',', '.');
@@ -223,6 +216,7 @@ string iniNode::trim(string &s) {
 	return s;
 }
 string iniNode::prepareString(string &s, char*c, int ilosc) {
+	cout << s << endl;
 	if(c == NULL) {
 		c = new char[3];
 		c[0] = '.';
@@ -232,6 +226,7 @@ string iniNode::prepareString(string &s, char*c, int ilosc) {
 	}
 	int i = 0;
 	bool flaga = false;
+	bool flaga2 = false;
 	string temp = "";
 	for(; i < s.length(); i++) {
 		for(int j = 0; j < ilosc; j++) {
@@ -239,31 +234,27 @@ string iniNode::prepareString(string &s, char*c, int ilosc) {
 				flaga = true;
 			}
 		}
+		if(s[i] == '=') {
+			flaga2 = true;
+		}
 		if(flaga) {
 			break;
 		}
-		if((i < s.length() - 2) && s[i] == '[' && s[i + 2] == ']') {
-			string temp = s.substr(0, i + 1);
-			cout << temp << ", ";
-			char *temp2;
-			//itoa(this->arrayLength, temp2, 10);
-			temp += "1";
-			temp += s.substr(i + 2, s.length() - 1);
-			s = temp;
-			cout << s << endl;
-			this->arrayLength++;
-		} else if((i < s.length() - 1) && s[i] == '[' && s[i + 1] == ']') {
-			string temp = s.substr(0, i + 1);
-			char *temp2;
+		if((i < s.length() - 1) && s[i] == '[' && s[i + 1] == ']') {
+			string temp1 = s.substr(0, i + 1);
+			char temp2[50];
 			itoa(this->arrayLength, temp2, 10);
-			temp += temp2;
-			temp += s.substr(i + 1, s.length() - 1);
-			s = temp;
-			this->arrayLength++;
+			temp1 += temp2;
+			temp1 += s.substr(i + 1, s.length() - 1);
+			s = temp1;
+			this->arrayLength = this->arrayLength + 1;
 		}
 		temp += s[i];
 	}
 	s.erase(0, i + 1);
+	if(flaga2) {
+		replace(s.begin(), s.end(), '.', ',');
+	}
 	return temp;
 }
 bool iniNode::empty() {
