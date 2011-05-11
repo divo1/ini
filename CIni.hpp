@@ -29,7 +29,8 @@ class iniNode {
 		string value;
 		bool exist;
 		string trim(string &);
-		string prepareString(string &);
+		string prepareString(string &s, char*c = NULL, int ilosc = 3);
+		int arrayLength;
 	public:
 		map<string, iniNode*> child;
 		iniNode();
