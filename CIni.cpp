@@ -82,14 +82,7 @@ iniNode::iniNode(string &s) {
 	bool flaga = false;
 	this->trim(s);
 	if(!s.empty()) {
-		int i = 0;
-		for(; i < s.length(); i++) {
-			if(s[i] == '.' || s[i] == '=' || s[i] == '\0') {
-				break;
-			}
-			this->name += s[i];
-		}
-		s.erase(0, i + 1);
+		
 	}
 	string temp = "";
 	if(!s.empty()) {
@@ -254,6 +247,31 @@ string iniNode::trim(string &s) {
 		}
 	}
 	return s;
+}
+string iniNode::prepareString(string &s, char*c = NULL, int ilosc = 3) {
+	if(c == NULL) {
+		c = new char[3];
+		c[0] = '.';
+		c[1] = '=';
+		c[2] = '\0';
+		ilosc = 3;
+	}
+	int i = 0;
+	bool flaga = false;
+	string temp = "";
+	for(; i < s.length(); i++) {
+		for(int j = 0; j < ilosc; j++) {
+			if(s[i] == c[j]) {
+				flaga = true;
+			}
+		}
+		if(flaga) {
+			break;
+		}
+		temp += s[i];
+	}
+	s.erase(0, i + 1);
+	return temp;
 }
 bool iniNode::empty() {
 	return !this->exist;

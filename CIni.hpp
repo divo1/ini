@@ -30,6 +30,7 @@ class iniNode {
 		string value;
 		bool exist;
 		string trim(string &);
+		string prepareString(string &);
 	public:
 		map<string, iniNode*> child;
 		iniNode();
