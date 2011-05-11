@@ -62,7 +62,8 @@ CIni::operator string() {
 		temp += "[" + ((string)(*it).first) + "]\n";
 		map<string, iniNode*>::iterator it2;
 		for(it2 = (*it).second->child.begin(); it2 != (*it).second->child.end(); it2++) {
-			temp += "\t" + (*it2).first + "\n";
+			temp += "\t" + (*it2).first + " : " + (*it2).second->get() + "\n";
+			temp += (*it2).second->toString(2);
 		}
 	}
 	return temp;
@@ -90,6 +91,7 @@ iniNode::iniNode(string &s) {
 		}
 		s.erase(0, i + 1);
 	}
+	string temp = "";
 	if(!s.empty()) {
 		int i = 0;
 		for(; i < s.length(); i++) {
@@ -99,7 +101,7 @@ iniNode::iniNode(string &s) {
 				}
 				break;
 			}
-			this->value += s[i];
+			temp += s[i];
 		}
 		s.erase(0, i + 1);
 	}
@@ -107,33 +109,38 @@ iniNode::iniNode(string &s) {
 	if(flaga) {
 		replace(s.begin(), s.end(), '.', ',');
 	}
+	this->value = temp;
 	this->add(this->value, s);
+
+	if(!flaga) {
+		this->value = "[Array]";
+	}
 	replace(this->value.begin(), this->value.end(), ',', '.');
 }
 iniNode::iniNode(string name, string &s) {
 	this->name = this->trim(name);
 	this->trim(s);
-	this->value = "";
+	this->value = "[Array]";
 	this->exist = true;
 	bool flaga = false;
-	if(!s.empty()) {
-		int i = 0;
-		for(; i < s.length(); i++) {
-			if(s[i] == '.' || s[i] == '=' || s[i] == '\0') {
-				if(s[i] == '=') {
-					flaga = true;
-				}
-				break;
+	string temp = "";
+	int i = 0;
+	for(; i < s.length(); i++) {
+		if(s[i] == '.' || s[i] == '=' || s[i] == '\0') {
+			if(s[i] == '=') {
+				flaga = true;
 			}
-			this->value += s[i];
+			break;
 		}
-		s.erase(0, i + 1);
+		temp += s[i];
 	}
+	s.erase(0, i + 1);
 	
 	if(flaga) {
 		replace(s.begin(), s.end(), '.', ',');
 	}
-	this->add(this->value, s);
+	this->value = temp;
+	this->add(temp, s);
 	replace(this->value.begin(), this->value.end(), ',', '.');
 }
 iniNode::iniNode(string name, string s, bool flag) {
@@ -147,7 +154,7 @@ void iniNode::add(string s) {
 		int i = 0;
 		string name = "";
 		for(; i < s.length(); i++) {
-			if(s[i] == '.' || s[i] == '=' || s[i] == '\0') {
+			if(s[i] == '.' || s[i] == '\0') {
 				break;
 			}
 			name += s[i];
@@ -174,8 +181,14 @@ void iniNode::add(string name, string s) {
 				names += s[i];
 			}
 			s.erase(0, i + 1);
-			
-			this->child[name]->add(names, s);
+
+			if(!s.empty()) {
+				this->child[name]->add(names, s);
+			} else {
+				this->child[name]->value = names;
+				map<string,iniNode*> temp;
+				this->child[name]->child = temp;
+			}
 		}
 	}
 }
@@ -202,7 +215,19 @@ iniNode::operator string() {
 	string temp;
 	map<string, iniNode*>::iterator it;
 	for(it = this->child.begin(); it != this->child.end(); it++) {
-		temp += (*it).first + " : " + ((*it).second->value) + '\n' + (string)(*(*it).second);
+		temp += (*it).first + " : " + ((*it).second->value);
+	}
+	return temp;
+}
+string iniNode::toString(int i) {
+	string temp;
+	map<string, iniNode*>::iterator it;
+	for(it = this->child.begin(); it != this->child.end(); it++) {
+		for(int j = 0; j < i; j++) {
+			temp += '\t';
+		}
+		temp += (*it).first + " : " + ((string)(*it).second->get("empty")) + '\n';
+		temp += (*it).second->toString(i + 1);
 	}
 	return temp;
 }
