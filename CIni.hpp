@@ -16,7 +16,6 @@ class CIni {
 	private:
 		fstream file;
 		map<string, iniNode*> nodes;
-		map<string, int> sekcja_nr;
 		string parent;
 	public:
 		CIni(string);

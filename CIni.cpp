@@ -1,3 +1,5 @@
+#include "CIni.hpp"
+
 CIni::CIni(string filepath) {
 	this->file.open(filepath.c_str(), fstream::in | fstream::out);
 	
