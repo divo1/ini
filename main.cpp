@@ -1,5 +1,4 @@
 #include "CIni.hpp"
-#include "CIni.cpp"
 #include <time.h>
 
 /**

@@ -1,9 +1,12 @@
 #include <exception>
-class CIniException : public std::exception {
+
+using namespace std;
+
+class CIniException : public exception {
 	private:
 		const char* msg;
 	public:
-		CIniException(const char *m) throw() : std::exception() {
+		CIniException(const char *m) throw() : exception() {
 			this->msg = m;
 		}
 		virtual const char* what() const throw() {
