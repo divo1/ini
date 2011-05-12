@@ -13,9 +13,9 @@
  */
 
 int main() {
-
-	CIni c("config.ini");
-	cout << (string)c;
+	cout << 1;
+	//CIni c("config.ini");
+	//cout << (string)c;
 
 /*
 	string str = "test2.test3 = 2.5.6";

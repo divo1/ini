@@ -1,5 +1,4 @@
 #include "CIni.hpp"
-#include <cstring>
 
 CIni::CIni(string filepath) {
 	this->file.open(filepath.c_str(), fstream::in | fstream::out);
@@ -91,15 +90,15 @@ iniNode::iniNode(string &s) {
 	}
 	string temp = "";
 	if(!s.empty()) {
-		temp = this->prepareString(s);
+		this->prepareString(s, this->name, this->value);
 	}
 	
-	this->value = temp;
+	//this->value = temp;
 	this->add(this->value, s);
 
-	if(!flaga) {
-		this->value = "[Array]";
-	}
+	// if(!flaga) {
+		// this->value = "[Array]";
+	// }
 	replace(this->value.begin(), this->value.end(), ',', '.');
 }
 iniNode::iniNode(string name, string &s) {
@@ -108,10 +107,10 @@ iniNode::iniNode(string name, string &s) {
 	this->value = "[Array]";
 	this->exist = true;
 	this->arrayLength = 0;
-	string temp = this->prepareString(s);;
+	this->prepareString(s, this->name, this->value);
 	
-	this->value = temp;
-	this->add(temp, s);
+	// this->value = temp;
+	this->add(this->value, s);
 	replace(this->value.begin(), this->value.end(), ',', '.');
 }
 iniNode::iniNode(string name, string s, bool flag) {
@@ -127,10 +126,10 @@ void iniNode::add(string s) {
 		char *c = new char[2];
 		c[0] = '.';
 		c[1] = '\0';
-		string name = this->prepareString(s, c, 2);
+		this->prepareString(s, this->name, this->value);
 
 		if(!s.empty()) {
-			this->add(name, s);
+			this->add(this->name, s);
 		}
 	}
 }
@@ -140,12 +139,12 @@ void iniNode::add(string name, string s) {
 		if(this->child.find(name) == this->child.end()) {
 			this->child.insert(pair<string,iniNode*>(name, new iniNode(name, s)));
 		} else {
-			string names = this->prepareString(s);
+			this->prepareString(s, this->name, this->value);
 
 			if(!s.empty()) {
-				this->child[name]->add(names, s);
+				this->child[name]->add(this->name, s);
 			} else {
-				this->child[name]->value = names;
+				this->child[name]->value = "Array()";
 				map<string,iniNode*> temp;
 				this->child[name]->child = temp;
 			}
@@ -215,47 +214,26 @@ string iniNode::trim(string &s) {
 	}
 	return s;
 }
-string iniNode::prepareString(string &s, char*c, int ilosc) {
-	cout << s << endl;
-	if(c == NULL) {
-		c = new char[3];
-		c[0] = '.';
-		c[1] = '=';
-		c[2] = '\0';
-		ilosc = 3;
-	}
-	int i = 0;
-	bool flaga = false;
-	bool flaga2 = false;
+void iniNode::prepareString(string &s, string &name, string &value) {
 	string temp = "";
-	for(; i < s.length(); i++) {
-		for(int j = 0; j < ilosc; j++) {
-			if(s[i] == c[j]) {
-				flaga = true;
-			}
+	bool flaga = true;
+	bool flaga2 = false;
+	int i = 0;
+	while(flaga) {
+		switch(s[i]) {
+			case '.': flaga2 = true;
+			case '=': temp = s.substr(0, i - 1);s.erase(0, i + 1);flaga = false;break;
+			case '\0': flaga = false;break;
 		}
-		if(s[i] == '=') {
-			flaga2 = true;
-		}
-		if(flaga) {
-			break;
-		}
-		if((i < s.length() - 1) && s[i] == '[' && s[i + 1] == ']') {
-			string temp1 = s.substr(0, i + 1);
-			char temp2[50];
-			itoa(this->arrayLength, temp2, 10);
-			temp1 += temp2;
-			temp1 += s.substr(i + 1, s.length() - 1);
-			s = temp1;
-			this->arrayLength = this->arrayLength + 1;
-		}
-		temp += s[i];
+		i++;
 	}
-	s.erase(0, i + 1);
+	name = temp;
 	if(flaga2) {
-		replace(s.begin(), s.end(), '.', ',');
+		value = "Array()";
+	} else {
+		value = s;
+		// replace(s.begin(), s.end(), '.', ',');
 	}
-	return temp;
 }
 bool iniNode::empty() {
 	return !this->exist;
