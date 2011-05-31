@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <string>
 #include <vector>
 #include <map>
 #include <cstdlib>
@@ -28,28 +27,32 @@ class iniNode {
 		string name;
 		string value;
 		bool exist;
-		string trim(string &);
-		void prepareString(string &s, string &name, string &value);
+		void prepareString(string &s);
+
 		int arrayLength;
 	public:
 		map<string, iniNode*> child;
-		iniNode();
-		iniNode(string&);
-		iniNode(string, bool);
-		iniNode(string, string&);
-		iniNode(string, string, bool);
+		iniNode(string);
+		iniNode(string, string);
 
-		void add(string); // metoda do dodawania stringa do configa
+		void add(const char*);
+		void add(string&); // metoda do dodawania stringa do configa
 		void add(string, string);
-		
+
 		void copy(iniNode*);
 
-		string getName();
+		void setValue(string);
+		void setExist(bool);
+		int count();
+
 		iniNode operator [] (string);
+		iniNode operator [] (int);
 		bool empty();
 		operator string();
 		string toString(int i);
+		string getName();
 
+		// gettery
 		string get() throw(CIniException);
 		string get(string);
 		int get(int);

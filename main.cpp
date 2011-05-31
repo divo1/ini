@@ -1,4 +1,4 @@
-#include "CIni.hpp"
+#include "CIni.cpp"
 #include <time.h>
 
 /**
@@ -13,26 +13,37 @@
  */
 
 int main() {
-	cout << 1;
-	//CIni c("config.ini");
-	//cout << (string)c;
+	for(int i = 0; i < 999999; i++) {
+		CIni c("config.ini");
+		// cout << (string)c;
+		// cout << endl << endl;
+		cout << c["sekcja3"]["wartosc"]["wartosc"]["qwert1"][0].count();
+	}
 
-/*
-	string str = "test2.test3 = 2.5.6";
-	iniNode n("test", str);
-	str = "test4.test5 = aaa";
-	n.add(str);
-	str = "test8.test9 = aaa";
-	n.add("test7", str);
-	
-	str = "test16.test17 = 3.6.9";
-	iniNode n2("qwerty", str);
-	
-	cout << (string)n << endl << endl;
-	
-	cout << (string)n2 << endl << endl;
-	n2.copy(&n);
-	cout << endl;
-	cout << (string)n2 << endl;*/
+	// string name = "test";
+
+	// iniNode n(name);
+	// n.add("a.test2.test3 = 678nn.a.ad");
+
+	// n.add("a.test3.test3[] = nn.a09.ad");
+	// n.add("a.test3.test3[] = nn.a08.ad");
+	// n.add("a.test3.test3[] = nn.a07.ad");
+	// n.add("a.test3.test3[] = nn.a06.ad");
+	// n.add("a.test3.test3[] = nn.a05.ad");
+
+	// n.add("b.test4.test13 = 678nn.a.ad");
+	// n.add("c.test5.test13 = 678nn.a.ad");
+	// n.add("d.test6.test13 = 678nn.a.ad");
+
+
+	// n.add("e.test7.test13[] = 678nn.a1.ad");
+	// n.add("e.test7.test13[] = 678nn.a2.ad");
+	// n.add("e.test7.test13[] = 678nn.a3.ad");
+	// n.add("e.test7.test13[] = 678nn.a4.ad");
+	// n.add("e.test7.test13[] = 678nn.a5.ad");
+	// cout << (string)n;
+
+	// cout << (string)n["a"]["test3"]["test3"][0] << endl;
+
 	return 0;
 }

@@ -4,6 +4,6 @@ echo Build...
 echo -----------------
 g++ -pipe -c CIni.cpp
 ar rcs libCIni.a CIni.o
-g++ -enable-auto-import -pipe main.cpp -L. -lCIni -o CIniTest
+g++ -ggdb -enable-auto-import -pipe main.cpp -L. -lCIni -o CIniTest
 echo -----------------
 echo End...
