@@ -5,6 +5,11 @@
 #include <map>
 #include <cstdlib>
 #include <algorithm>
+#include <cstring>
+#include <sstream>
+
+#ifndef CINIHPP
+#define CINIHPP 1
 
 #include "CIniException.hpp"
 
@@ -17,6 +22,7 @@ class CIni {
 		map<string, iniNode*> nodes;
 		string parent;
 	public:
+		friend ostream& operator << (ostream &out, CIni &c);
 		CIni(string);
 		iniNode operator [] (string);
 		operator string();
@@ -24,16 +30,19 @@ class CIni {
 
 class iniNode {
 	private:
+		iniNode* parent;
 		string name;
 		string value;
 		bool exist;
+		bool array;
 		void prepareString(string &s);
 
 		int arrayLength;
 	public:
+		friend ostream& operator << (ostream &out, iniNode &c);
 		map<string, iniNode*> child;
-		iniNode(string);
-		iniNode(string, string);
+		iniNode(string, iniNode* parent = NULL);
+		iniNode(string, string, iniNode* parent = NULL);
 
 		void add(const char*);
 		void add(string&); // metoda do dodawania stringa do configa
@@ -49,8 +58,10 @@ class iniNode {
 		iniNode operator [] (int);
 		bool empty();
 		operator string();
-		string toString(int i);
+		string toString(int, string s = "");
+		string path();
 		string getName();
+		string* toArray();
 
 		// gettery
 		string get() throw(CIniException);
@@ -71,3 +82,5 @@ class iniNode {
 		double getD() throw(CIniException);
 		double getD(double);
 };
+
+#endif

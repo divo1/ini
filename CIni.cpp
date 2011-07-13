@@ -1,6 +1,21 @@
 #include "CIni.hpp"
-#include <cstring>
-#include <sstream>
+
+ostream& operator << (ostream& out, CIni &c) {
+	map<string, iniNode*>::iterator it;
+	string temp;
+	for(it = c.nodes.begin(); it != c.nodes.end(); it++) {
+		temp += "[" + ((string)(*it).first) + "]\n";
+		map<string, iniNode*>::iterator it2;
+		for(it2 = (*it).second->child.begin(); it2 != (*it).second->child.end(); it2++) {
+			temp += "\t" + (*it2).second->toString(1) + "\n";
+		}
+	}
+	out << temp;
+}
+ostream& operator << (ostream& out, iniNode &c) {
+	string temp = c.toString(1);
+	out << temp;
+}
 
 const std::string whiteSpaces(" \f\n\r\t\v");
 void trimRight( std::string& str, const std::string& trimChars = whiteSpaces ) {
@@ -74,22 +89,27 @@ CIni::operator string() {
 		temp += "[" + ((string)(*it).first) + "]\n";
 		map<string, iniNode*>::iterator it2;
 		for(it2 = (*it).second->child.begin(); it2 != (*it).second->child.end(); it2++) {
-			temp += "\t" + (*it2).second->toString(1) + "\n";
+			temp += (*it2).second->toString(1);
 		}
 	}
 	return temp;
 }
 
-iniNode::iniNode(string name) {
+
+iniNode::iniNode(string name, iniNode* parent) {
 	this->exist = true;
 	trim(name);
+	this->parent = parent;
 	this->name = name;
+	this->array = false;
 	this->arrayLength = 0;
 
 	//replace(this->value.begin(), this->value.end(), ',', '.');
 }
-iniNode::iniNode(string name, string s) {
+iniNode::iniNode(string name, string s, iniNode* parent) {
 	this->name = name;
+	this->parent = parent;
+	this->array = false;
 	this->exist = true;
 	this->arrayLength = 0;
 	this->add(s);
@@ -101,6 +121,7 @@ void iniNode::add(string &s) {
 	int i = 0;
 	string name = "";
 	bool flaga = false;
+	bool flaga2 = false;
 	for(; i < s.length(); i++) {
 		if(s[i] == '.' || s[i] == '=' || s[i] == '\0') {
 			if(s[i] == '=') {
@@ -109,6 +130,7 @@ void iniNode::add(string &s) {
 			break;
 		}
 		if(s[i] == '[') {
+			flaga2 = true;
 			s[i] = ' ';
 			if(i < s.length() - 1) {
 				s[i + 1] = ' ';
@@ -127,15 +149,26 @@ void iniNode::add(string &s) {
 	s.erase(0, i + 1);
 	trim(name);
 	trim(s);
+	
+	if(this->parent != NULL && this->parent->array) {
+		this->array = true;
+	}
 
 	if(flaga) {
 		this->value = "Array()";
+		if(flaga2) {
+			this->array = true;
+		}
 		if(this->child.find(name) == this->child.end()) {
-			this->child.insert(pair<string,iniNode*>(name, new iniNode(name)));
+			this->child.insert(pair<string,iniNode*>(name, new iniNode(name, this)));
 		}
 		this->child[name]->setValue(s);
 	} else {
 		this->add(name, s);
+	}
+	
+	if(this->parent != NULL) {
+		this->parent->array = false;
 	}
 }
 
@@ -147,7 +180,10 @@ void iniNode::add(string name, string s) {
 	this->value = "Array()";
 
 	if(this->child.find(name) == this->child.end()) {
-		this->child.insert(pair<string,iniNode*>(name, new iniNode(name, s)));
+		if(this->arrayLength > 1) {
+			this->arrayLength = 0;
+		}
+		this->child.insert(pair<string,iniNode*>(name, new iniNode(name, s, this)));
 	} else {
 		this->child[name]->add(s);
 	}
@@ -156,7 +192,7 @@ void iniNode::add(string name, string s) {
 void iniNode::copy(iniNode *n) {
 	map<string, iniNode*>::iterator it;
 	for(it = n->child.begin(); it != n->child.end(); it++) {
-		this->child.insert(pair<string,iniNode*>((*it).first, new iniNode((*it).first)));
+		this->child.insert(pair<string,iniNode*>((*it).first, new iniNode((*it).first, this)));
 		this->child[(*it).first]->setValue((*it).second->value);
 		this->child[(*it).first]->copy((*it).second);
 	}
@@ -168,7 +204,7 @@ iniNode iniNode::operator [](string s) {
 		this->child[s]->setValue("empty()");
 		this->child[s]->setExist(false);
 	}
-	return (*this->child[s]);
+	return (*this->child.find(s)->second);
 }
 iniNode iniNode::operator [](int i) {
 	ostringstream ss;
@@ -179,26 +215,50 @@ iniNode iniNode::operator [](int i) {
 		this->child[s]->setValue("empty()");
 		this->child[s]->setExist(false);
 	}
-	return (*this->child[s]);
+	return (*this->child.find(s)->second);
 }
 string iniNode::getName() {
 	return this->name;
 }
+string* iniNode::toArray() {
+	string *s = new string[this->child.size()];
+	int i = 0;
+	for(map<string, iniNode*>::iterator it = this->child.begin(); it != this->child.end(); it++, i++) {
+		s[i] = (*it).first;
+	}
+	return s;
+}
+
 iniNode::operator string() {
 	string temp = this->toString(1);
 	return temp;
 }
-string iniNode::toString(int i) {
+string iniNode::toString(int i, string temp2) {
 	i = i + 1;
-	string temp = this->name + " = " + this->value + "\n";
+	string temp = "";
+
+	if(this->value != "Array()") {
+		if(this->array) {
+			temp = "\t" + this->parent->path() + "[" +this->name + "] = " + this->value + "\n";
+		} else {
+			temp = "\t" + this->parent->path() + this->name + " = " + this->value + "\n";
+		}
+	}
 	map<string, iniNode*>::iterator it;
 	for(it = this->child.begin(); it != this->child.end(); it++) {
-		for(int j = 0; j < i; j++) {
-			temp += "\t";
-		}
-		temp += (*it).second->toString(i + 1);
+		temp += temp2;
+		temp += (*it).second->toString(i + 1, temp2);
 	}
 	return temp;
+}
+string iniNode::path() {
+	if(this->parent == NULL) {
+		return "";
+	// } else if(this->child.size() == 0) {
+		// return this->parent->path() + this->name;
+	} else {
+		return this->parent->path() + this->name + ".";
+	}
 }
 void iniNode::prepareString(string &s) {
 
