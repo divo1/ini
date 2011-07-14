@@ -22,12 +22,10 @@ void trimRight( std::string& str, const std::string& trimChars = whiteSpaces ) {
 	std::string::size_type pos = str.find_last_not_of( trimChars );
 	str.erase( pos + 1 );
 }
-
 void trimLeft( std::string& str, const std::string& trimChars = whiteSpaces ) {
 	std::string::size_type pos = str.find_first_not_of( trimChars );
 	str.erase( 0, pos );
 }
-
 void trim( std::string& str, const std::string& trimChars = whiteSpaces ) {
 	trimRight( str, trimChars );
 	trimLeft( str, trimChars );
@@ -156,20 +154,23 @@ void iniNode::add(string &s) {
 
 	if(flaga) {
 		this->value = "Array()";
-		if(flaga2) {
-			this->array = true;
-		}
 		if(this->child.find(name) == this->child.end()) {
 			this->child.insert(pair<string,iniNode*>(name, new iniNode(name, this)));
 		}
 		this->child[name]->setValue(s);
+		if(flaga2) {
+			this->child[name]->array = true;
+		}
 	} else {
 		this->add(name, s);
+		if(flaga2) {
+			this->child[name]->array = true;
+		}
 	}
-	
+	/*
 	if(this->parent != NULL) {
 		this->parent->array = false;
-	}
+	}*/
 }
 
 void iniNode::add(const char* s) {
@@ -194,6 +195,8 @@ void iniNode::copy(iniNode *n) {
 	for(it = n->child.begin(); it != n->child.end(); it++) {
 		this->child.insert(pair<string,iniNode*>((*it).first, new iniNode((*it).first, this)));
 		this->child[(*it).first]->setValue((*it).second->value);
+		this->child[(*it).first]->array = (*it).second->array;
+		this->child[(*it).first]->parent = (*it).second->parent;
 		this->child[(*it).first]->copy((*it).second);
 	}
 }
@@ -238,8 +241,9 @@ string iniNode::toString(int i, string temp2) {
 	string temp = "";
 
 	if(this->value != "Array()") {
-		if(this->array) {
-			temp = "\t" + this->parent->path() + "[" +this->name + "] = " + this->value + "\n";
+		if(this->parent != NULL && this->parent->array) {
+			// temp = "\t" + this->parent->path() + "[" +this->name + "] = " + this->value + "\n";
+			temp = "\t" + this->parent->path() + "[] = " + this->value + "\n";
 		} else {
 			temp = "\t" + this->parent->path() + this->name + " = " + this->value + "\n";
 		}
@@ -257,7 +261,13 @@ string iniNode::path() {
 	// } else if(this->child.size() == 0) {
 		// return this->parent->path() + this->name;
 	} else {
-		return this->parent->path() + this->name + ".";
+		if(this->parent->array) {
+			return this->parent->path() + "[" + this->name + "]";
+		} else if(this->array) {
+			return this->parent->path() + this->name;
+		} else {
+			return this->parent->path() + this->name + ".";
+		}
 	}
 }
 void iniNode::prepareString(string &s) {
