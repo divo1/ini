@@ -1,20 +1,13 @@
 #include "CIni.hpp"
 
 ostream& operator << (ostream& out, CIni &c) {
-	map<string, iniNode*>::iterator it;
-	string temp;
-	for(it = c.nodes.begin(); it != c.nodes.end(); it++) {
-		temp += "[" + ((string)(*it).first) + "]\n";
-		map<string, iniNode*>::iterator it2;
-		for(it2 = (*it).second->child.begin(); it2 != (*it).second->child.end(); it2++) {
-			temp += "\t" + (*it2).second->toString(1) + "\n";
-		}
-	}
-	out << temp;
+	out << (string)c;
 }
 ostream& operator << (ostream& out, iniNode &c) {
-	string temp = c.toString(1);
-	out << temp;
+	out << c.toString(1);
+}
+ostream& operator << (ostream& out, iniNode c) {
+	out << c.toString(1);
 }
 
 const std::string whiteSpaces(" \f\n\r\t\v");
@@ -71,6 +64,9 @@ CIni::CIni(string filepath) {
 			}
 		}
 	}
+}
+CIni::~CIni() {
+	this->file.close();
 }
 iniNode CIni::operator [](string s) {
 	if(this->nodes.find(s) == this->nodes.end()) {
@@ -147,7 +143,7 @@ void iniNode::add(string &s) {
 	s.erase(0, i + 1);
 	trim(name);
 	trim(s);
-	
+
 	if(this->parent != NULL && this->parent->array) {
 		this->array = true;
 	}
@@ -241,11 +237,15 @@ string iniNode::toString(int i, string temp2) {
 	string temp = "";
 
 	if(this->value != "Array()") {
-		if(this->parent != NULL && this->parent->array) {
-			// temp = "\t" + this->parent->path() + "[" +this->name + "] = " + this->value + "\n";
-			temp = "\t" + this->parent->path() + "[] = " + this->value + "\n";
+		if(this->parent != NULL) {
+			if(this->parent->array) {
+				// temp = "\t" + this->parent->path() + "[" +this->name + "] = " + this->value + "\n";
+				temp = "\t" + this->parent->path() + "[] = " + this->value + "\n";
+			} else {
+				temp = "\t" + this->parent->path() + this->name + " = " + this->value + "\n";
+			}
 		} else {
-			temp = "\t" + this->parent->path() + this->name + " = " + this->value + "\n";
+			temp = "\t" + this->name + " = " + this->value + "\n";
 		}
 	}
 	map<string, iniNode*>::iterator it;

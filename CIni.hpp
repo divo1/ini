@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cstring>
 #include <sstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #ifndef CINIHPP
 #define CINIHPP 1
@@ -24,6 +26,7 @@ class CIni {
 	public:
 		friend ostream& operator << (ostream &out, CIni &c);
 		CIni(string);
+		~CIni();
 		iniNode operator [] (string);
 		operator string();
 };
@@ -40,6 +43,7 @@ class iniNode {
 		int arrayLength;
 	public:
 		friend ostream& operator << (ostream &out, iniNode &c);
+		friend ostream& operator << (ostream &out, iniNode c);
 		map<string, iniNode*> child;
 		iniNode(string, iniNode* parent = NULL);
 		iniNode(string, string, iniNode* parent = NULL);
