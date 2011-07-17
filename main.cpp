@@ -30,6 +30,10 @@ int main() {
 
 
 	CIni c("config.ini");
-	cout << c["sekcja1"]["sekcja4"];
+	CIni d("config.ini");
+	
+	d.add("[sekcja1]sekcja4.name = 1.0");
+	
+	d >> c;
 	return 0;
 }

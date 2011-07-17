@@ -9,17 +9,35 @@ ostream& operator << (ostream& out, iniNode &c) {
 ostream& operator << (ostream& out, iniNode c) {
 	out << c.toString(1);
 }
+istream& operator >> (istream& in, CIni c) {
+	string s;
+	in >> s;
+	c.add(s);
+	return in;
+}
+istream& operator >> (istream& in, iniNode &c) {
+	string s;
+	in >> s;
+	c.add(s);
+	return in;
+}
+istream& operator >> (istream& in, iniNode c) {
+	string s;
+	in >> s;
+	c.add(s);
+	return in;
+}
 
 const std::string whiteSpaces(" \f\n\r\t\v");
-void trimRight( std::string& str, const std::string& trimChars = whiteSpaces ) {
+void trimRight(std::string& str, const std::string& trimChars = whiteSpaces) {
 	std::string::size_type pos = str.find_last_not_of( trimChars );
 	str.erase( pos + 1 );
 }
-void trimLeft( std::string& str, const std::string& trimChars = whiteSpaces ) {
+void trimLeft(std::string& str, const std::string& trimChars = whiteSpaces) {
 	std::string::size_type pos = str.find_first_not_of( trimChars );
 	str.erase( 0, pos );
 }
-void trim( std::string& str, const std::string& trimChars = whiteSpaces ) {
+void trim(std::string& str, const std::string& trimChars = whiteSpaces) {
 	trimRight( str, trimChars );
 	trimLeft( str, trimChars );
 }
@@ -28,39 +46,51 @@ CIni::CIni(string filepath) {
 	this->file.open(filepath.c_str(), fstream::in);
 
 	string temp;
-	string name = "default";
+	this->lastName = "default";
 	while(this->file.good()) {
 		getline(this->file, temp);
 		trim(temp);
 
-		if(!temp.empty() && temp[0] != ';') {
-			if(temp[0] == '[') {
-				temp[0] = ' ';
-				replace(temp.begin(), temp.end(), ']', ' ');
-				trim(temp);
-				size_t found = temp.find(':');
-				if(found != string::npos) {
-					name = temp.substr(0, found);
-					string parent = temp.substr(found + 1);
+		this->add(temp);
+	}
+}
+void CIni::add(string temp) {
+	if(!temp.empty() && temp[0] != ';') {
+		if(temp[0] == '[') {
+			temp[0] = ' ';
+			size_t found = temp.find(']');
+			string temp2 = "";
+			if(found != string::npos) {
+				temp2 = temp.substr(found + 1);
+				temp = temp.substr(0, found);
+			}
 
-					if(this->nodes.find(name) == this->nodes.end()) {
-						this->nodes.insert(pair<string,iniNode*>(name, new iniNode(name)));
-						this->nodes[name]->setValue("sekcja()");
-						if(this->nodes.find(parent) != this->nodes.end()) {
-							this->nodes[name]->copy(this->nodes[parent]);
-						}
+			trim(temp);
+			found = temp.find(':');
+			if(found != string::npos) {
+				this->lastName = temp.substr(0, found);
+				string parent = temp.substr(found + 1);
+
+				if(this->nodes.find(this->lastName) == this->nodes.end()) {
+					this->nodes.insert(pair<string,iniNode*>(this->lastName, new iniNode(this->lastName)));
+					this->nodes[this->lastName]->setValue("sekcja()");
+					if(this->nodes.find(parent) != this->nodes.end()) {
+						this->nodes[this->lastName]->copy(this->nodes[parent]);
 					}
-				} else {
-					name = temp;
-					this->nodes.insert(pair<string,iniNode*>(temp, new iniNode(temp)));
-					this->nodes[temp]->setValue("sekcja()");
 				}
 			} else {
-				if(this->nodes.find(name) == this->nodes.end()) {
-					this->nodes.insert(pair<string,iniNode*>(name, new iniNode(name, temp)));
-				} else {
-					this->nodes[name]->add(temp);
-				}
+				this->lastName = temp;
+				this->nodes.insert(pair<string,iniNode*>(temp, new iniNode(temp)));
+				this->nodes[temp]->setValue("sekcja()");
+			}
+			
+			temp = temp2;
+		}
+		if(!temp.empty()) {
+			if(this->nodes.find(this->lastName) == this->nodes.end()) {
+				this->nodes.insert(pair<string,iniNode*>(this->lastName, new iniNode(this->lastName, temp)));
+			} else {
+				this->nodes[this->lastName]->add(temp);
 			}
 		}
 	}

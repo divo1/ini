@@ -23,12 +23,14 @@ class CIni {
 		fstream file;
 		map<string, iniNode*> nodes;
 		string parent;
+		string lastName;
 	public:
 		friend ostream& operator << (ostream &out, CIni &c);
 		CIni(string);
 		~CIni();
 		iniNode operator [] (string);
 		operator string();
+		void add(string);
 };
 
 class iniNode {
