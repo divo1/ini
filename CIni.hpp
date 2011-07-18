@@ -24,13 +24,17 @@ class CIni {
 		map<string, iniNode*> nodes;
 		string parent;
 		string lastName;
+
+		string filePath;
+		struct stat fileStats;
 	public:
 		friend ostream& operator << (ostream &out, CIni &c);
 		CIni(string);
 		~CIni();
 		iniNode operator [] (string);
 		operator string();
-		void add(string);
+		void addOrReplace(string);
+		void addOrReplaceFile(string);
 };
 
 class iniNode {

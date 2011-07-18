@@ -12,7 +12,7 @@ ostream& operator << (ostream& out, iniNode c) {
 istream& operator >> (istream& in, CIni c) {
 	string s;
 	in >> s;
-	c.add(s);
+	c.addOrReplace(s);
 	return in;
 }
 istream& operator >> (istream& in, iniNode &c) {
@@ -43,7 +43,9 @@ void trim(std::string& str, const std::string& trimChars = whiteSpaces) {
 }
 
 CIni::CIni(string filepath) {
-	this->file.open(filepath.c_str(), fstream::in);
+	this->filePath = filepath;
+	this->file.open(this->filePath.c_str(), fstream::in);
+	stat(this->filePath.c_str(), &(this->fileStats));
 
 	string temp;
 	this->lastName = "default";
@@ -51,10 +53,10 @@ CIni::CIni(string filepath) {
 		getline(this->file, temp);
 		trim(temp);
 
-		this->add(temp);
+		this->addOrReplace(temp);
 	}
 }
-void CIni::add(string temp) {
+void CIni::addOrReplace(string temp) {
 	if(!temp.empty() && temp[0] != ';') {
 		if(temp[0] == '[') {
 			temp[0] = ' ';
@@ -83,7 +85,7 @@ void CIni::add(string temp) {
 				this->nodes.insert(pair<string,iniNode*>(temp, new iniNode(temp)));
 				this->nodes[temp]->setValue("sekcja()");
 			}
-			
+
 			temp = temp2;
 		}
 		if(!temp.empty()) {
@@ -94,6 +96,30 @@ void CIni::add(string temp) {
 			}
 		}
 	}
+}
+void CIni::addOrReplaceFile(string f) {
+	fstream file;
+	file.open(f.c_str(), fstream::in);
+
+	string temp;
+	while(file.good()) {
+		getline(file, temp);
+		trim(temp);
+
+		this->addOrReplace(temp);
+	}
+
+	fstream out;
+	out.open(this->filePath.c_str(), fstream::out);
+	out << this;
+}
+void CIni::refresh() {
+	struct stat buff;
+	stat(this->filePath.c_str(), &buff)
+	if(buff.st_mtime > this->fileStats.st_mtime) {
+		this->addOrReplace(this->filePath);
+	}
+	this->fileStats = buff;
 }
 CIni::~CIni() {
 	this->file.close();

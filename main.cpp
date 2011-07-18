@@ -29,11 +29,11 @@ int main() {
 
 
 
-	CIni c("config.ini");
-	CIni d("config.ini");
+	// CIni c("config.ini");
+	// CIni d("config.ini");
 	
-	d.add("[sekcja1]sekcja4.name = 1.0");
+	// d.add("[sekcja1]sekcja4.name = 1.0");
 	
-	d >> c;
+	// d >> c;
 	return 0;
 }
