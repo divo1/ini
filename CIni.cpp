@@ -115,11 +115,11 @@ void CIni::addOrReplaceFile(string f) {
 }
 void CIni::refresh() {
 	struct stat buff;
-	stat(this->filePath.c_str(), &buff)
+	stat(this->filePath.c_str(), &buff);
 	if(buff.st_mtime > this->fileStats.st_mtime) {
 		this->addOrReplace(this->filePath);
 	}
-	this->fileStats = buff;
+	stat(this->filePath.c_str(), &this->fileStats);
 }
 CIni::~CIni() {
 	this->file.close();

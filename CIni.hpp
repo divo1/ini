@@ -35,6 +35,7 @@ class CIni {
 		operator string();
 		void addOrReplace(string);
 		void addOrReplaceFile(string);
+		void refresh();
 };
 
 class iniNode {
